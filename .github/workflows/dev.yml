@@ -20,11 +20,11 @@ jobs:
 
       - name: Installing firebase cli
         run: |
-          pnpm install firebase-tools --location=global
+          npm install firebase-tools --location=global
 
       - name: Installing packages
         run: |
-          ppnpm i
+          pnpm i
       
       - name: Creating the build
         run: |
