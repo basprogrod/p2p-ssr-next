@@ -1,9 +1,8 @@
 {
   "hosting": {
-    "public": "out",
+    "public": ".next/server/pages",
     "ignore": [
       "firebase.json",
-      "**/.*",
       "**/node_modules/**"
     ]
   }
