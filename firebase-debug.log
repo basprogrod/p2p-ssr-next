@@ -1,0 +1,47 @@
+[debug] [2022-07-06T07:56:01.495Z] ----------------------------------------------------------------------
+[debug] [2022-07-06T07:56:01.497Z] Command:       /Users/igor/.nvm/versions/node/v18.3.0/bin/node /Users/igor/.nvm/versions/node/v18.3.0/bin/firebase init
+[debug] [2022-07-06T07:56:01.497Z] CLI Version:   11.1.0
+[debug] [2022-07-06T07:56:01.497Z] Platform:      darwin
+[debug] [2022-07-06T07:56:01.497Z] Node Version:  v18.3.0
+[debug] [2022-07-06T07:56:01.501Z] Time:          Wed Jul 06 2022 10:56:01 GMT+0300 (Москва, стандартное время)
+[debug] [2022-07-06T07:56:01.501Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-07-06T07:56:01.533Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-07-06T07:56:01.534Z] > authorizing via signed-in user (ivasilyeu@linkando.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /Users/igor/Desktop/next-p2p
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2022-07-06T07:57:45.207Z] Using project from CLI flag: test-voting-19bb6
+[debug] [2022-07-06T07:57:45.209Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/test-voting-19bb6 [none]
+[debug] [2022-07-06T07:57:46.124Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/test-voting-19bb6 200
+[debug] [2022-07-06T07:57:46.124Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/test-voting-19bb6 {"projectId":"test-voting-19bb6","projectNumber":"479493651677","displayName":"test-voting","name":"projects/test-voting-19bb6","resources":{"hostingSite":"test-voting-19bb6"},"state":"ACTIVE"}
+[info] i  Using project test-voting-19bb6 (test-voting) 
+[info] 
+=== Hosting:github Setup
+[info] 
+[info] i  Detected a .git folder at /Users/igor/Desktop/next-p2p 
+[info] i  Authorizing with GitHub to upload your service account to a GitHub repository's secrets store. 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://github.com/login/oauth/authorize?client_id=89cf50f02ac6aaed3484&state=1029411012&redirect_uri=http%3A%2F%2Flocalhost%3A9005&scope=read%3Auser%20repo%20public_repo
+[info] 
+[info] Waiting for authentication...
