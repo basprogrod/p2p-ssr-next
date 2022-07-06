@@ -1,22 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { FC, SyntheticEvent, useEffect, useState } from "react";
+import { FC, SyntheticEvent, useEffect, useMemo, useState } from "react";
 import { DataConnection, Peer } from "peerjs";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 interface HomeProps {
-  current: string;
-  other: string[];
-  initiator: string;
   init: boolean;
   electionItems: string[];
 }
 
 const Home: FC<HomeProps> = ({
   electionItems,
-  current,
-  other,
-  initiator,
-  init,
 }) => {
   const [peer, setPeer] = useState<Peer | undefined>(undefined);
   const [connection, setConnection] = useState<DataConnection | undefined>(
@@ -27,8 +21,24 @@ const Home: FC<HomeProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isVoted, setIsVoted] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+  const [data, setData] = useState<any>(undefined)
+  const {query} = useRouter()
+  const {current, initiator} = useMemo(() => {
+    return data ? data : {}
+  }, [data])
+  const init = !!query.init
 
   useEffect(() => {
+    const getData = async () => {
+     const res = await axios.get(`${process.env.DEMO_API || 'http://localhost:3000'}/api/get-users`);
+     setData(res.data)
+    }
+
+    getData()
+  }, [])
+
+  useEffect(() => {
+    if (!data) return;
     if (!numbers.length) return;
 
     const init = electionItems.reduce<{ [field: number]: number }>(
@@ -54,9 +64,10 @@ const Home: FC<HomeProps> = ({
     });
 
     setResult(r);
-  }, [numbers]);
+  }, [numbers, data]);
 
   useEffect(() => {
+    if (!data) return;
     import("peerjs").then(({ default: Peer }) => {
       const newPeer = new Peer(init ? initiator : current, { debug: 2 });
 
@@ -75,9 +86,10 @@ const Home: FC<HomeProps> = ({
 
       setPeer(newPeer);
     });
-  }, []);
+  }, [data]);
 
   useEffect(() => {
+    if (!data) return;
     if (!peer) return;
     if (init) return;
 
@@ -88,7 +100,7 @@ const Home: FC<HomeProps> = ({
     });
 
     setConnection(conn);
-  }, [isOpen]);
+  }, [isOpen, data]);
 
   const sendData = (e: SyntheticEvent<HTMLButtonElement>) => {
     setIsVoted(true);
@@ -96,9 +108,10 @@ const Home: FC<HomeProps> = ({
   };
 
   useEffect(() => {
+    if (!data) return;
     if (!peer) return;
     (window as any).peer = peer;
-  }, [peer]);
+  }, [peer, data]);
 
   return (
     <div className="Home">
@@ -121,30 +134,27 @@ const Home: FC<HomeProps> = ({
         </h3>
       ))}
 
-      {/* <h3>Initiator user ID</h3>
-      <div>{initiator}</div> */}
-      {/* 
+      <h3>Initiator user ID</h3>
+      <div>{initiator}</div> 
+      
       <h3>Current user ID</h3>
       <div>{init ? initiator : current}</div>
 
       <h3>Other connected users</h3>
       {connectedUsers.map(id => (
         <div key={id}>{id}</div>
-      ))} */}
+      ))}
     </div>
   );
 };
 
 export default Home;
 
-export async function getServerSideProps({ query }: any) {
-  const res = await axios.get("http://localhost:3000/api/get-users");
-  console.log("🚀 ~ file: index.tsx ~ line 94 ~ res", res.data);
+export async function getStaticProps() {
+  
 
   return {
     props: {
-      ...res.data,
-      init: !!query.init,
       electionItems: ["One", "Two", "Three", "Four", "Five"],
     }, // will be passed to the page component as props
   };

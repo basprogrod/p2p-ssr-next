@@ -1,6 +1,10 @@
 name: GitHub Actions Demo
 
 on: [push]
+
+env:
+  DEMO_API: ttps://test-voting-19bb6.web.app
+
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
