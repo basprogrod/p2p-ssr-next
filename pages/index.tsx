@@ -36,9 +36,12 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
     undefined
   );
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+  const [result, setResult] = useState<string[]>([]);
   const [other, setOther] = useState<string[]>([]);
   const [isOpep, setIsOpen] = useState(false);
   const [current, setCurrent] = useState<string | undefined>();
+  const [numbers, setNumbers] = useState<number[]>([]);
+  const [isVoted, setIsVoted] = useState(false);
 
   useEffect(() => {
     getCurrent(setCurrent);
@@ -66,6 +69,7 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
 
         conn.on("data", (data) => {
           console.log(data);
+          setNumbers((state) => [...state, +(data as string)]);
         });
 
         setConnectedUsers((state) => {
@@ -98,12 +102,6 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
     conns.forEach((con) => {
       con.on("open", () => {
         console.log("connected to ", con.peer.split("-").shift());
-        // con.send("Hi");
-      });
-
-      con.on("data", (data) => {
-        console.log(data);
-        // con.send("Hi");
       });
     });
 
@@ -124,36 +122,82 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
     (window as any).peer = peer;
   }, [peer, other]);
 
+  useEffect(() => {
+    const init = electionItems.reduce<{ [field: number]: number }>(
+      (acc, _cur, i) => {
+        acc[i] = 0;
+        return acc;
+      },
+      {}
+    );
+
+    const preparedData = numbers.reduce<{ [field: number]: number }>(
+      (acc, cur) => {
+        if (!!acc[cur]) acc[cur]++;
+        else acc[cur] = 1;
+        return acc;
+      },
+      init
+    );
+
+    const r = Object.keys(preparedData).map((key) => {
+      return ((preparedData[+key] / numbers.length) * 100).toFixed(2);
+    });
+
+    setResult(r);
+  }, [numbers]);
+
   return (
     <div className="Home">
-      <button onClick={sendData}>Send</button>
-      <button onClick={reset}>Reset</button>
-      {/* {electionItems.map((name, i) => (
+      <div>
+        {/* <button onClick={sendData}>Send</button> */}
+        <button onClick={reset}>Reset</button>
+      </div>
+
+      {electionItems.map((name, i) => (
         <button
           key={name}
           disabled={isVoted}
           data-election-id={i}
-          onClick={sendData}
+          onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
+            if (!current) return;
+            setNumbers((state) => [...state, i]);
+            setIsVoted(true)
+            connections.forEach((c) => {
+              c.send(i);
+            });
+          }}
         >
           {name}
         </button>
       ))}
 
-      <h1>Result</h1>
+      <h5>Result</h5>
 
       {result.map((item, i) => (
-        <h3 key={i}>
-          <span>{electionItems[i]}:</span> <span>{item || 0} %</span>
-        </h3>
-      ))} */}
+        <div key={i}>
+          <span>{electionItems[i]}:</span> <span>{+item || 0} %</span>
+          <div
+            style={{
+              background: "#0003",
+              height: "10px",
+              width: `${(+item || 0) * 2}px`,
+              transition: 'all .2s'
+              
+            }}
+          />
+        </div>
+      ))}
 
-      <h3>Current user ID</h3>
+      {/* <h3>Current user ID</h3>
       <div>{current}</div>
 
       <h3>Other connected users</h3>
       {connectedUsers.map((id) => (
-        <div key={id}>{id}</div>
-      ))}
+        <div style={{ fontSize: "5px" }} key={id}>
+          {id}
+        </div>
+      ))} */}
     </div>
   );
 };
