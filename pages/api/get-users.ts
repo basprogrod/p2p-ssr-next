@@ -1,55 +1,59 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { v4 as uuidv4 } from 'uuid'
+import type { NextApiRequest, NextApiResponse } from "next";
+import { v4 as uuidv4 } from "uuid";
 
-const db = {
-  setInitiator(id: string) {
-    this.initiator = id
-  },
+type Db = {
+  users: string[]
+  add: (id: string) => void
+  reset: () => void
+  getOther: (id: string) => string[]
+  getAll: () => string[]
+  getCurrent: () => string
+}
 
-  getInitiator() {
-    return this.initiator
-  },
-
+const db: Db = {
   add(id: string) {
-    this.users.push(id)
+    this.users.push(id);
   },
 
   getOther(id: string) {
-    return this.users.filter(item => item !== id)
+    return this.users.filter((item) => item !== id);
   },
 
-  getCurrent(): string {
-    return this.users[this.users.length - 1]
+  getAll() {
+    return this.users;
+  },
+
+  getCurrent(id?: string): string {
+    // if (id) return this.users.filter((item) => item === id)  
+    return this.users[this.users.length - 1];
   },
 
   reset() {
-    this.users = []
-    this.initiator = undefined
+    this.users = [];
   },
-  initiator: undefined as string | undefined,
   users: [] as string[],
-}
+};
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    const uuid = uuidv4()
+  if (req.method === "GET") {
+    const uuid = uuidv4();
 
-    if (req.query.reset) {
-      db.reset()
+    if ("reset" in req.query) {
+      db.reset();
 
-      res.send('OK')
-      return
+      res.send(db.getAll());
+      return;
     }
 
-    if(!db.initiator) db.setInitiator(uuid)
+    if ("other" in req.query) {
+      res.send(db.getOther(req.query.current as string));
 
-    db.add(uuid)
+      return;
+    }
 
-    res.send({
-      current: db.getCurrent(),
-      other: db.getOther(db.getCurrent()),
-      initiator: db.getInitiator(),
-    })
+    db.add(uuid);
+
+    res.send(db.getCurrent());
   }
 }
