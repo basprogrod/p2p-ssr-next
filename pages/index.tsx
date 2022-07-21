@@ -193,7 +193,7 @@ export default Home;
 export async function getStaticProps() {
   return {
     props: {
-      DEMO_API: process.env.DEMO_API,
+      DEMO_API: process.env.DEMO_API || 'https://p2p-voting.netlify.app',
       electionItems: ["One", "Two", "Three"],
     }, // will be passed to the page component as props
   };
