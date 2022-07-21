@@ -5,32 +5,10 @@ import axios from "axios";
 interface HomeProps {
   init: boolean;
   electionItems: string[];
+  DEMO_API: string;
 }
 
-const getCurrent = async (setCurrent: any) => {
-  const res = await axios.get(
-    `${process.env.DEMO_API || "http://localhost:3000"}/api/get-users`
-  );
-  setCurrent(res.data);
-};
-
-const getOther = async (setOther, id) => {
-  const res = await axios.get(
-    `${
-      process.env.DEMO_API || "http://localhost:3000"
-    }/api/get-users?other&current=${id}`
-  );
-  setOther(res.data);
-};
-
-const reset = async () => {
-  const res = await axios.get(
-    `${process.env.DEMO_API || "http://localhost:3000"}/api/get-users?reset`
-  );
-  console.log("🚀 ~ file: index.tsx ~ line 32 ~ res", res.data);
-};
-
-const Home: FC<HomeProps> = ({ electionItems }) => {
+const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   const [peer, setPeer] = useState<Peer | undefined>(undefined);
   const [connections, setConnections] = useState<DataConnection[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
@@ -40,6 +18,23 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
   const [current, setCurrent] = useState<string | undefined>();
   const [numbers, setNumbers] = useState<number[]>([]);
   const [isVoted, setIsVoted] = useState(false);
+
+  const getCurrent = async (setCurrent: any) => {
+    const res = await axios.get(`${DEMO_API}/api/get-users`);
+    setCurrent(res.data);
+  };
+
+  const getOther = async (setOther, id) => {
+    const res = await axios.get(
+      `${DEMO_API}/api/get-users?other&current=${id}`
+    );
+    setOther(res.data);
+  };
+
+  const reset = async () => {
+    const res = await axios.get(`${DEMO_API}/api/get-users?reset`);
+    console.log("🚀 ~ file: index.tsx ~ line 32 ~ res", res.data);
+  };
 
   useEffect(() => {
     getCurrent(setCurrent);
@@ -63,7 +58,7 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
 
       newPeer.on("connection", (conn) => {
         console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
-     
+
         conn.on("data", (data) => {
           console.log(data);
           setNumbers((state) => [...state, +(data as string)]);
@@ -140,7 +135,7 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
     connections.forEach((c) => {
       c.send(numbers[numbers.length - 1]);
     });
-  }, [isVoted])
+  }, [isVoted]);
 
   return (
     <div className="Home">
@@ -157,7 +152,7 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
           onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
             if (!current) return;
             setNumbers((state) => [...state, i]);
-            setIsVoted(true)
+            setIsVoted(true);
           }}
         >
           {name}
@@ -174,8 +169,7 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
               background: "#0003",
               height: "10px",
               width: `${(+item || 0) * 2}px`,
-              transition: 'all .2s'
-              
+              transition: "all .2s",
             }}
           />
         </div>
@@ -199,6 +193,7 @@ export default Home;
 export async function getStaticProps() {
   return {
     props: {
+      DEMO_API: process.env.DEMO_API,
       electionItems: ["One", "Two", "Three"],
     }, // will be passed to the page component as props
   };
