@@ -32,9 +32,7 @@ const reset = async () => {
 
 const Home: FC<HomeProps> = ({ electionItems }) => {
   const [peer, setPeer] = useState<Peer | undefined>(undefined);
-  const [connections, setConnections] = useState<DataConnection[] | undefined>(
-    undefined
-  );
+  const [connections, setConnections] = useState<DataConnection[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const [result, setResult] = useState<string[]>([]);
   const [other, setOther] = useState<string[]>([]);
@@ -65,8 +63,7 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
 
       newPeer.on("connection", (conn) => {
         console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
-        // getOther(setOther, current)
-
+     
         conn.on("data", (data) => {
           console.log(data);
           setNumbers((state) => [...state, +(data as string)]);
@@ -108,14 +105,6 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
     setConnections(conns);
   }, [other, isOpep]);
 
-  const sendData = (e: SyntheticEvent<HTMLButtonElement>) => {
-    if (!current) return;
-
-    connections.forEach((c) => {
-      c.send("Hello from " + current.split("-").shift());
-    });
-  };
-
   useEffect(() => {
     if (!other.length) return;
     if (!peer) return;
@@ -147,6 +136,12 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
     setResult(r);
   }, [numbers]);
 
+  useEffect(() => {
+    connections.forEach((c) => {
+      c.send(numbers[numbers.length - 1]);
+    });
+  }, [isVoted])
+
   return (
     <div className="Home">
       <div>
@@ -163,9 +158,6 @@ const Home: FC<HomeProps> = ({ electionItems }) => {
             if (!current) return;
             setNumbers((state) => [...state, i]);
             setIsVoted(true)
-            connections.forEach((c) => {
-              c.send(i);
-            });
           }}
         >
           {name}
@@ -207,7 +199,7 @@ export default Home;
 export async function getStaticProps() {
   return {
     props: {
-      electionItems: ["One", "Two", "Three", "Four", "Five"],
+      electionItems: ["One", "Two", "Three"],
     }, // will be passed to the page component as props
   };
 }

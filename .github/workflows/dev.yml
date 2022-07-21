@@ -36,4 +36,3 @@ jobs:
         
       - name: Deploy to Firebase
         run: |
-          firebase deploy firebase deploy --token 1//0cxI5aK25anwaCgYIARAAGAwSNwF-L9Irei6_fw0LSazmBdFYOeUYinA4iOHHshSdaCRNcMrI91FOR-DKytUoCRigDpoV0v782Tk --project test-voting-19bb6
