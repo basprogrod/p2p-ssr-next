@@ -1,38 +1,38 @@
-name: GitHub Actions Demo
+# name: GitHub Actions Demo
 
-on: [push]
+# on: [push]
 
-env:
-  DEMO_API: ttps://test-voting-19bb6.web.app
+# env:
+#   DEMO_API: ttps://test-voting-19bb6.web.app
 
-jobs:
-  Explore-GitHub-Actions:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+# jobs:
+#   Explore-GitHub-Actions:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out repository code
+#         uses: actions/checkout@v3
       
-      - name: Use pnpm
-        uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 6.0.2
+#       - name: Use pnpm
+#         uses: pnpm/action-setup@v2.2.2
+#         with:
+#           version: 6.0.2
       
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+#       - name: List files in the repository
+#         run: |
+#           ls ${{ github.workspace }}
+#       - run: echo "🍏 This job's status is ${{ job.status }}."
 
-      - name: Installing firebase cli
-        run: |
-          npm install firebase-tools --location=global
+#       - name: Installing firebase cli
+#         run: |
+#           npm install firebase-tools --location=global
 
-      - name: Installing packages
-        run: |
-          pnpm i
+#       - name: Installing packages
+#         run: |
+#           pnpm i
       
-      - name: Creating the build
-        run: |
-          pnpm build
+#       - name: Creating the build
+#         run: |
+#           pnpm build
         
-      - name: Deploy to Firebase
-        run: |
+#       - name: Deploy to Firebase
+#         run: |
