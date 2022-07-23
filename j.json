@@ -1,0 +1,37 @@
+[
+  [
+    { "peerId": "0", "relatedPeers": [] },
+    { "peerId": "1", "relatedPeers": ["0"] },
+    { "peerId": "2", "relatedPeers": ["1"] },
+    { "peerId": "3", "relatedPeers": ["2"] },
+    { "peerId": "4", "relatedPeers": ["3"] }
+  ],
+  [
+    { "peerId": "5", "relatedPeers": ["0"] },
+    { "peerId": "6", "relatedPeers": ["5", "1"] },
+    { "peerId": "7", "relatedPeers": ["6", "2"] },
+    { "peerId": "8", "relatedPeers": ["7", "3"] },
+    { "peerId": "9", "relatedPeers": ["8", "4"] }
+  ],
+  [
+    { "peerId": "10", "relatedPeers": ["5"] },
+    { "peerId": "11", "relatedPeers": ["10", "6"] },
+    { "peerId": "12", "relatedPeers": ["11", "7"] },
+    { "peerId": "13", "relatedPeers": ["12", "8"] },
+    { "peerId": "14", "relatedPeers": ["13", "9"] }
+  ],
+  [
+    { "peerId": "15", "relatedPeers": ["10"] },
+    { "peerId": "16", "relatedPeers": ["15", "11"] },
+    { "peerId": "17", "relatedPeers": ["16", "12"] },
+    { "peerId": "18", "relatedPeers": ["17", "13"] },
+    { "peerId": "19", "relatedPeers": ["18", "14"] }
+  ],
+  [
+    { "peerId": "20", "relatedPeers": ["15"] },
+    { "peerId": "21", "relatedPeers": ["20", "16"] },
+    { "peerId": "22", "relatedPeers": ["21", "17"] },
+    { "peerId": "23", "relatedPeers": ["22", "18"] },
+    { "peerId": "24", "relatedPeers": ["23", "19"] }
+  ]
+]

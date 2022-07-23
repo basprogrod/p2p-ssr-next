@@ -20,7 +20,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   const [isVoted, setIsVoted] = useState(false);
 
   const getCurrent = async (setCurrent: any) => {
-    const res = await axios.get(`${DEMO_API}/api/get-users`);
+    const res = await axios.get(`${DEMO_API}/api/get-reer`);
     setCurrent(res.data);
   };
 
@@ -32,7 +32,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   };
 
   const reset = async () => {
-    const res = await axios.get(`${DEMO_API}/api/get-users?reset`);
+    const res = await axios.get(`${DEMO_API}/api/get-reer?reset`);
     console.log("🚀 ~ file: index.tsx ~ line 32 ~ res", res.data);
   };
 
@@ -90,6 +90,15 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
     if (!isOpep) return;
 
     const conns = other.map((conId) => peer.connect(conId));
+
+    const d = () => {
+      return {
+        a: 'kek'
+      }
+    }
+    const s = () => ({
+      a: 'kek'
+    })
 
     conns.forEach((con) => {
       con.on("open", () => {
