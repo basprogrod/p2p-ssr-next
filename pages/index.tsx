@@ -1,6 +1,7 @@
 import { FC, SyntheticEvent, useEffect, useMemo, useState } from "react";
 import { DataConnection, Peer } from "peerjs";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
+import { PeerType } from "./api/get-peer";
 
 interface HomeProps {
   init: boolean;
@@ -10,29 +11,24 @@ interface HomeProps {
 
 const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   const [peer, setPeer] = useState<Peer | undefined>(undefined);
-  const [connections, setConnections] = useState<DataConnection[]>([]);
+  const [current, setCurrent] = useState<PeerType | undefined>();
+  const [isOpen, setIsOpen] = useState(false);
+
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const [result, setResult] = useState<string[]>([]);
-  const [other, setOther] = useState<string[]>([]);
-  const [isOpep, setIsOpen] = useState(false);
-  const [current, setCurrent] = useState<string | undefined>();
+  const [connections, setConnections] = useState<DataConnection[]>([]);
+
+  // const [other, setOther] = useState<string[]>([]);
   const [numbers, setNumbers] = useState<number[]>([]);
-  const [isVoted, setIsVoted] = useState(false);
+  // const [isVoted, setIsVoted] = useState(false);
 
   const getCurrent = async (setCurrent: any) => {
-    const res = await axios.get(`${DEMO_API}/api/get-reer`);
+    const res = await axios.get<PeerType>(`${DEMO_API}/api/get-peer`);
     setCurrent(res.data);
   };
 
-  const getOther = async (setOther, id) => {
-    const res = await axios.get(
-      `${DEMO_API}/api/get-users?other&current=${id}`
-    );
-    setOther(res.data);
-  };
-
   const reset = async () => {
-    const res = await axios.get(`${DEMO_API}/api/get-reer?reset`);
+    const res = await axios.get(`${DEMO_API}/api/get-peer?reset`);
     console.log("🚀 ~ file: index.tsx ~ line 32 ~ res", res.data);
   };
 
@@ -42,14 +38,9 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
 
   useEffect(() => {
     if (!current) return;
-    getOther(setOther, current);
-  }, [current]);
-
-  useEffect(() => {
-    if (!current) return;
 
     import("peerjs").then(({ default: Peer }) => {
-      const newPeer = new Peer(current, { debug: 2 });
+      const newPeer = new Peer(current.peerId, { debug: 2 });
 
       newPeer.on("open", () => {
         console.log("🚀 ~ open");
@@ -60,8 +51,9 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
         console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
 
         conn.on("data", (data) => {
-          console.log(data);
-          setNumbers((state) => [...state, +(data as string)]);
+          if (typeof data === "string") {
+            setNumbers(JSON.parse(data as string));
+          }
         });
 
         setConnectedUsers((state) => {
@@ -75,45 +67,47 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   }, [current]);
 
   useEffect(() => {
-    const last = connectedUsers[connectedUsers.length - 1];
+    if (!current?.linkedPeers.length) return;
+    if (!isOpen) return;
 
-    if (other.some((el) => el === last)) return;
+    const conns = current.linkedPeers.map((peerId) => {
+      return peer.connect(peerId);
+    });
 
-    setOther((state) => {
-      const s = new Set([...state, last]);
+    setConnections((state) => {
+      const s = new Set([...state, ...conns]);
+      return [...s];
+    });
+  }, [current?.linkedPeers, isOpen]);
+
+  useEffect(() => {
+    if (!connectedUsers.length) return;
+
+    const lastConnectedUser = connectedUsers[connectedUsers.length - 1];
+
+    const linksSet = new Set(current.linkedPeers);
+
+    if (linksSet.has(lastConnectedUser)) return;
+
+    const conns = [];
+
+    for (const peerId of connectedUsers) {
+      if (linksSet.has(peerId)) continue;
+      conns.push(peer.connect(peerId));
+    }
+
+    peer.connect(lastConnectedUser);
+
+    setConnections((state) => {
+      const s = new Set([...state, ...conns]);
       return [...s];
     });
   }, [connectedUsers]);
 
   useEffect(() => {
-    if (!other.length) return;
-    if (!isOpep) return;
-
-    const conns = other.map((conId) => peer.connect(conId));
-
-    const d = () => {
-      return {
-        a: 'kek'
-      }
-    }
-    const s = () => ({
-      a: 'kek'
-    })
-
-    conns.forEach((con) => {
-      con.on("open", () => {
-        console.log("connected to ", con.peer.split("-").shift());
-      });
-    });
-
-    setConnections(conns);
-  }, [other, isOpep]);
-
-  useEffect(() => {
-    if (!other.length) return;
     if (!peer) return;
     (window as any).peer = peer;
-  }, [peer, other]);
+  }, [peer]);
 
   useEffect(() => {
     const init = electionItems.reduce<{ [field: number]: number }>(
@@ -142,9 +136,9 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
 
   useEffect(() => {
     connections.forEach((c) => {
-      c.send(numbers[numbers.length - 1]);
+      c.send(JSON.stringify(numbers));
     });
-  }, [isVoted]);
+  }, [result.toString()]);
 
   return (
     <div className="Home">
@@ -156,19 +150,19 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
       {electionItems.map((name, i) => (
         <button
           key={name}
-          disabled={isVoted}
+          // disabled={isVoted}
           data-election-id={i}
           onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
             if (!current) return;
             setNumbers((state) => [...state, i]);
-            setIsVoted(true);
+            // setIsVoted(true);
           }}
         >
           {name}
         </button>
       ))}
 
-      <h5>Result</h5>
+      <i>Result</i>
 
       {result.map((item, i) => (
         <div key={i}>
@@ -183,16 +177,37 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
           />
         </div>
       ))}
+      <hr />
+      <div>
+        <i>Current user ID</i>
+        <div>{current?.peerId}</div>
+      </div>
+      <hr />
+      <div>
+        <i>Connested users</i>
+        {connectedUsers.map((id) => (
+          <button
+            onClick={() => {
+              const conn = peer.connect(id);
 
-      {/* <h3>Current user ID</h3>
-      <div>{current}</div>
-
-      <h3>Other connected users</h3>
-      {connectedUsers.map((id) => (
-        <div style={{ fontSize: "5px" }} key={id}>
-          {id}
-        </div>
-      ))} */}
+              setConnections((state) => {
+                const s = new Set([...state, conn]);
+                return [...s];
+              });
+            }}
+            key={id}
+          >
+            {id}
+          </button>
+        ))}
+      </div>
+      <hr />
+      <div>
+        <i>Linked users</i>
+        {current?.linkedPeers.map((it) => (
+          <div key={it}>{it}</div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -202,7 +217,7 @@ export default Home;
 export async function getStaticProps() {
   return {
     props: {
-      DEMO_API: process.env.DEMO_API || 'https://p2p-voting.netlify.app',
+      DEMO_API: process.env.DEMO_API || "https://p2p-voting.netlify.app",
       electionItems: ["One", "Two", "Three"],
     }, // will be passed to the page component as props
   };

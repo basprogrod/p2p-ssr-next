@@ -4,20 +4,13 @@ import { v4 as uuidv4 } from "uuid";
 
 type Db = {};
 
-type Peer = {
+export type PeerType = {
   peerId: string | null;
   linkedPeers: string[];
 };
-[
-  [null, null, null, null, null],
-  [null, null, null, null, null],
-  [null, null, null, null, null],
-  [null, null, null, null, null],
-  [null, null, null, null, null],
-];
 
 class Mesh {
-  mesh: (Peer | null)[][];
+  mesh: (PeerType | null)[][];
   sizeOfMesh: number;
 
   constructor(size: number = 5) {
@@ -25,10 +18,10 @@ class Mesh {
     this.mesh = [];
   }
 
-  add(id: string): (Peer | null)[][] {
+  add(id: string): PeerType {
     const { mesh, getlinkedPeers } = this;
 
-    let newPeer = undefined;
+    let newPeer: PeerType = undefined;
 
     Outer: for (let i = 0; i < mesh.length; i++) {
       const row = mesh[i];
@@ -38,7 +31,7 @@ class Mesh {
 
         if (col.peerId) continue;
 
-        const peer: Peer = {
+        const peer: PeerType = {
           peerId: id,
           linkedPeers: [],
         };
@@ -75,11 +68,11 @@ class Mesh {
   }
 
   private getlinkedPeers(
-    peer: Peer,
+    peer: PeerType,
     mesh: Mesh["mesh"],
     i: number,
     j: number
-  ): Peer {
+  ): PeerType {
     for (const [row, col] of [
       [0, 1],
       [1, 0],
@@ -117,7 +110,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // const m = mesh.add((u++).toString());
     const m = mesh.add(uuid);
-    res.send(m || 'the list of participants is filled');
+    const r = { ...m, mesh: mesh.getMesh() };
+    res.send(r);
     // console.log("🚀", m);
   }
 }
