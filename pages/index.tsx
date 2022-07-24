@@ -14,13 +14,13 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   const [current, setCurrent] = useState<PeerType | undefined>();
   const [isOpen, setIsOpen] = useState(false);
 
+  const [isVoted, setIsVoted] = useState(false);
+
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const [result, setResult] = useState<string[]>([]);
   const [connections, setConnections] = useState<DataConnection[]>([]);
 
-  // const [other, setOther] = useState<string[]>([]);
   const [numbers, setNumbers] = useState<number[]>([]);
-  // const [isVoted, setIsVoted] = useState(false);
 
   const getCurrent = async (setCurrent: any) => {
     const res = await axios.get<PeerType>(`${DEMO_API}/api/get-peer`);
@@ -147,20 +147,23 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
         <button onClick={reset}>Reset</button>
       </div>
 
-      {electionItems.map((name, i) => (
-        <button
-          key={name}
-          // disabled={isVoted}
-          data-election-id={i}
-          onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
-            if (!current) return;
-            setNumbers((state) => [...state, i]);
-            // setIsVoted(true);
-          }}
-        >
-          {name}
-        </button>
-      ))}
+      <div style={{ margin: "30px" }}>
+        {electionItems.map((name, i) => (
+          <button
+            key={name}
+            data-election-id={i}
+            style={{ background: `#9c${i}`, margin: "10px", padding: '5px' }}
+            disabled={isVoted}
+            onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
+              if (!current) return;
+              setNumbers((state) => [...state, i]);
+              setIsVoted(true);
+            }}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
 
       <i>Result</i>
 
