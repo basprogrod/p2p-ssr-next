@@ -152,7 +152,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
           <button
             key={name}
             data-election-id={i}
-            style={{ background: `#9c${i}`, margin: "10px", padding: '5px' }}
+            style={{ background: `#9c${i}`, margin: "10px", padding: "5px" }}
             disabled={isVoted}
             onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
               if (!current) return;
@@ -166,6 +166,8 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
       </div>
 
       <i>Result</i>
+
+      <div>Number of votes {numbers.length}</div>
 
       {result.map((item, i) => (
         <div key={i}>
