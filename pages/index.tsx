@@ -51,6 +51,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
         console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
 
         conn.on("data", (data) => {
+          console.log('🚀 ~ data', data)
           if (typeof data === "string") {
             setNumbers(JSON.parse(data as string));
           }
