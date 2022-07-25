@@ -33,6 +33,10 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   };
 
   useEffect(() => {
+    console.log('numbers', numbers);
+  }, [numbers])
+
+  useEffect(() => {
     getCurrent(setCurrent);
   }, []);
 
@@ -48,12 +52,16 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
       });
 
       newPeer.on("connection", (conn) => {
-        console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
+        // console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
 
         conn.on("data", (data) => {
-          console.log('🚀 ~ data', data)
           if (typeof data === "string") {
-            setNumbers(JSON.parse(data as string));
+            const parsedData = JSON.parse(data as string)
+
+            setNumbers(state => {
+              if (state.toString() === parsedData.toString()) return state
+              return parsedData
+            });
           }
         });
 
@@ -139,7 +147,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
     connections.forEach((c) => {
       c.send(JSON.stringify(numbers));
     });
-  }, [result.toString()]);
+  }, [numbers.toString()]);
 
   return (
     <div className="Home">
