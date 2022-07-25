@@ -32,9 +32,9 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
     console.log("🚀 ~ file: index.tsx ~ line 32 ~ res", res.data);
   };
 
-  useEffect(() => {
-    console.log('numbers', numbers);
-  }, [numbers])
+  // useEffect(() => {
+  //   console.log('numbers', numbers);
+  // }, [numbers])
 
   useEffect(() => {
     getCurrent(setCurrent);
@@ -57,6 +57,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
         conn.on("data", (data) => {
           if (typeof data === "string") {
             const parsedData = JSON.parse(data as string)
+            console.log('🚀 ~ file: index.tsx ~ line 60 ~ parsedData', parsedData)
 
             setNumbers(state => {
               if (state.toString() === parsedData.toString()) return state
