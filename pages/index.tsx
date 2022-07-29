@@ -1,4 +1,4 @@
-import { FC, SyntheticEvent, useEffect, useMemo, useState } from "react";
+import { Dispatch, FC, SetStateAction, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataConnection, Peer } from "peerjs";
 import axios, { AxiosResponse } from "axios";
 import { PeerType } from "./api/get-peer";
@@ -8,6 +8,41 @@ interface HomeProps {
   electionItems: string[];
   DEMO_API: string;
 }
+interface Dto {
+  peer: string,
+  numbers: number[],
+  isVoted: boolean,
+}
+
+const collectAndSet = (set: Dispatch<SetStateAction<number[]>>) => {
+  console.log('collectAndSet inited');
+  
+  const store: Dto[] = []
+
+  let tid: NodeJS.Timeout = undefined
+
+  tid = setInterval(() => {
+    if (!store.length) return 
+    console.log('Tick!', store);
+
+
+    
+
+    set(store.shift().numbers)
+  }, 300)
+
+  // ;(collectAndSet as <T extends Function>{stop : () => void}).stop = () => {
+  //   clearInterval(tid)
+  // }
+  return (data: Dto) => {
+
+    store.push(data)    
+  }
+}
+
+
+
+
 
 const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   const [peer, setPeer] = useState<Peer | undefined>(undefined);
@@ -22,9 +57,14 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
 
   const [numbers, setNumbers] = useState<number[]>([]);
 
+  const refCurrent = useRef<PeerType>()
+  const refQueuer = useRef<(data: Dto) => void>()
+
   const getCurrent = async (setCurrent: any) => {
     const res = await axios.get<PeerType>(`${DEMO_API}/api/get-peer`);
+    
     setCurrent(res.data);
+    refCurrent.current = res.data
   };
 
   const reset = async () => {
@@ -32,9 +72,9 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
     console.log("🚀 ~ file: index.tsx ~ line 32 ~ res", res.data);
   };
 
-  // useEffect(() => {
-  //   console.log('numbers', numbers);
-  // }, [numbers])
+  useEffect(() => {
+    refQueuer.current = collectAndSet(setNumbers)
+  }, []);
 
   useEffect(() => {
     getCurrent(setCurrent);
@@ -52,17 +92,21 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
       });
 
       newPeer.on("connection", (conn) => {
-        // console.log("🚀 ~ ", "connection with ", conn.peer.split("-").shift());
-
-        conn.on("data", (data) => {
+        conn.on("data", (data: string) => {
+          const parsedData: Dto = JSON.parse(data)
+          console.log('🚀 ~ parsedData', parsedData.numbers)
           if (typeof data === "string") {
-            const parsedData = JSON.parse(data as string)
-            console.log('🚀 ~ file: index.tsx ~ line 60 ~ parsedData', parsedData)
+            
+            // console.log('🚀 ', parsedData.peer, parsedData.peer === refCurrent.current.peerId, refCurrent.current.peerId)
 
-            setNumbers(state => {
-              if (state.toString() === parsedData.toString()) return state
-              return parsedData
-            });
+            if (parsedData.peer === refCurrent.current.peerId) {
+              return
+            }
+            // setNumbers(state => {
+            //   if (state.toString() === parsedData.toString()) return state
+            //   return parsedData.numbers
+            // });
+            // refQueuer.current(parsedData);
           }
         });
 
@@ -145,8 +189,15 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
   }, [numbers]);
 
   useEffect(() => {
+    if (!isOpen) return
+    
+    
     connections.forEach((c) => {
-      c.send(JSON.stringify(numbers));
+      c.send(JSON.stringify({
+        peer: current.peerId,
+        numbers,
+        isVoted,
+      }));
     });
   }, [numbers.toString()]);
 
@@ -163,7 +214,7 @@ const Home: FC<HomeProps> = ({ electionItems, DEMO_API }) => {
             key={name}
             data-election-id={i}
             style={{ background: `#9c${i}`, margin: "10px", padding: "5px" }}
-            disabled={isVoted}
+            // disabled={isVoted}
             onClick={(e: SyntheticEvent<HTMLButtonElement>) => {
               if (!current) return;
               setNumbers((state) => [...state, i]);

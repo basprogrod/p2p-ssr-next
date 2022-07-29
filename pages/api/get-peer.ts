@@ -2,8 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
 
-type Db = {};
-
 export type PeerType = {
   peerId: string | null;
   linkedPeers: string[];
@@ -91,10 +89,9 @@ class Mesh {
   }
 }
 
-const mesh = new Mesh(3);
+const mesh = new Mesh(5);
 mesh.createMesh();
 
-let u = 0;
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
@@ -102,7 +99,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if ("reset" in req.query) {
       mesh.reset();
-      u = 0;
       res.send(mesh.getMesh());
 
       return;
